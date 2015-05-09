@@ -1,0 +1,573 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"render",
+				"render_loop"
+			],
+			[
+				"create",
+				"createShader"
+			],
+			[
+				"getel",
+				"getElementById(${0:id})	Element"
+			],
+			[
+				"webgl",
+				"webgl_states"
+			],
+			[
+				"c_hi",
+				"c_height"
+			],
+			[
+				"we",
+				"web_gl_obj"
+			],
+			[
+				"in",
+				"innerWidth	Window"
+			],
+			[
+				"inner",
+				"innerHeight	Window"
+			],
+			[
+				"he",
+				"height"
+			],
+			[
+				"clear",
+				"clear	Style CSS"
+			],
+			[
+				"console",
+				"console.log('$0');"
+			],
+			[
+				"ini",
+				"initGL"
+			],
+			[
+				"ca",
+				"catch"
+			],
+			[
+				"can",
+				"canvas_id"
+			],
+			[
+				"getElem",
+				"getElementById(${0:id})	Element"
+			],
+			[
+				"cons",
+				"console.log('$0');"
+			],
+			[
+				"shad",
+				"shad_p"
+			],
+			[
+				"E",
+				"ELEMENT_ARRAY_BUFFER"
+			],
+			[
+				"verte",
+				"vertex_indi_buffer"
+			],
+			[
+				"pro",
+				"program"
+			],
+			[
+				"Timer",
+				"TimerEvent"
+			],
+			[
+				"test",
+				"test_room"
+			],
+			[
+				"Game_",
+				"Game_space"
+			],
+			[
+				"Gae",
+				"Game_object"
+			],
+			[
+				"Game",
+				"Game_object"
+			],
+			[
+				"lib",
+				"Lib	openfl"
+			],
+			[
+				"std",
+				"std_msg"
+			],
+			[
+				"PR",
+				"PRIVMSG"
+			],
+			[
+				"n",
+				"n"
+			],
+			[
+				"tagc",
+				"tagContactPoint	var"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "axe_game.html",
+			"settings":
+			{
+				"buffer_size": 819,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "main.js",
+			"settings":
+			{
+				"buffer_size": 2015,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "webgl_tools.js",
+			"settings":
+			{
+				"buffer_size": 423,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"contents": "<html>\n\n<head>\n<title>WebGL Beginner's Guide - Chapter 2 - Rendering a Square</title>\n\n<!-- CSS Styles //-->\n<link href='css/style.css' 		type='text/css' rel='stylesheet'>\n<link href='css/desert.css' 	type='text/css' rel='stylesheet'/>\n<link href='css/smoothness/jquery-ui-1.8.13.custom.css' type='text/css' rel='stylesheet' />\n\n<!-- JavaScript Libraries //-->\n<script type='text/javascript' src='js/jquery-1.5.1.min.js'></script>\n<script type='text/javascript' src='js/jquery-ui-1.8.13.custom.min.js'></script> \n<script type='text/javascript' src='js/prettify.js'></script>\n<script type='text/javascript' src='js/utils.js'></script>\n<script type='text/javascript' src='js/codeview.js'></script>\n\n\n<!-- Fragment Shader //-->\n<script id=\"shader-fs\" type=\"x-shader/x-fragment\">\n    #ifdef GL_ES\n    precision highp float;\n    #endif\n    void main(void) {\n        gl_FragColor = vec4(0.5,0.5,1.0, 1.0);\n    }\n</script>\n\n<!-- Vertex Shader //-->\n<script id=\"shader-vs\" type=\"x-shader/x-vertex\">\n	attribute vec3 aVertexPosition;\n\n	void main(void) {\n		gl_Position = vec4(aVertexPosition,1.0); \n	}\n</script>\n\n<script id=\"code-js\" type=\"text/javascript\">\n	var gl = null; // WebGL context\n	var prg = null; // The program (shaders)\n	var c_width = 0; // Variable to store the width of the canvas\n	var c_height = 0; // Variable to store the height of the canvas\n	\n	var squareVertexBuffer = null; //The vertex buffer for the square\n	var squareIndexBuffer = null; // The index buffer for the square\n	\n	var indices = []; //JavaScript array to store the indices of the square\n	var vertices = []; //JavaScript array to store the vertices of the square\n	\n\n	/*\n	* The program contains a series of instructions that tell the Graphic Processing Unit (GPU)\n	* what to do with every vertex and fragment that we pass it. (more about this on chapter 3)\n	* The vertex shader and the fragment shader together are called the program.\n	*/\n	function initProgram() {\n		var fgShader = utils.getShader(gl, \"shader-fs\");\n		var vxShader = utils.getShader(gl, \"shader-vs\");\n\n		prg = gl.createProgram();\n		gl.attachShader(prg, vxShader);\n		gl.attachShader(prg, fgShader);\n		gl.linkProgram(prg);\n\n		if (!gl.getProgramParameter(prg, gl.LINK_STATUS)) {\n			alert(\"Could not initialise shaders\");\n		}\n\n		gl.useProgram(prg);\n\n		//The following lines allow us obtaining a reference to the uniforms and attributes defined in the shaders.\n		//This is a necessary step as the shaders are NOT written in JavaScript but in a \n		//specialized language called GLSL. More about this on chapter 3.\n		prg.vertexPosition = gl.getAttribLocation(prg, \"aVertexPosition\");\n	\n	}		\n	\n	/*\n	* Creates the buffers that contain the geometry of the square\n	*\n	*   #0 (-0.5,0.5) +--------------+  (0.5,0.5)  #3\n	*                 |              |\n	*                 |              |\n	*                 |      .(0,0)  |\n	*                 |              |\n	*                 |              | \n	*   #1(-0.5,-0.5) +--------------+  (0.5,-0.5) #2\n	*/\n	function initBuffers() {\n		\n        \n        vertices =  [\n		-0.5,0.5,0.0, 	//Vertex 0\n		-0.5,-0.5,0.0, 	//Vertex 1\n		0.5,-0.5,0.0, 	//Vertex 2\n		0.5,0.5,0.0]; 	//Vertex 3\n\n		indices = [3,2,1,3,1,0];\n		\n		//The following code snippet creates a vertex buffer and binds the vertices to it\n		squareVertexBuffer = gl.createBuffer();\n		gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);\n		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);\n		gl.bindBuffer(gl.ARRAY_BUFFER, null);\n		\n		//The following code snippet creates a vertex buffer and binds the indices to it\n		squareIndexBuffer = gl.createBuffer();\n		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndexBuffer);\n		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);\n		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);\n	}\n	\n	/**\n	* Draws the scene\n	*/\n	function drawScene(){\n		gl.clearColor(0.0, 0.0, 0.0, 1.0);\n		gl.enable(gl.DEPTH_TEST);\n	\n		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);\n		gl.viewport(0,0,c_width, c_height);\n		\n		gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);\n		gl.vertexAttribPointer(prg.aVertexPosition, 3, gl.FLOAT, false, 0, 0);\n		gl.enableVertexAttribArray(prg.vertexPosition);\n		\n		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndexBuffer);\n		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT,0);\n	}\n	\n	/**\n	* Render Loop\n	*/\n	function renderLoop() {\n		utils.requestAnimFrame(renderLoop);\n		drawScene();\n	}\n	/**\n	* Executes the WebGL application\n	* This function is invoked on the onLoad event of the webpage. \n	*/\n	function runWebGLApp(){\n		//Obtains a WebGL context\n		gl = utils.getGLContext('canvas-element-id');\n		//Initializes the program (shaders). More about this on chapter 3!\n		initProgram();\n		//Initializes the buffers that we are going to use to draw the square (vertex buffer and index buffer)\n		initBuffers();\n		//Renders the square!\n		renderLoop();\n	}\n	 </script>\n</head>\n\n<body onLoad='runWebGLApp()'>\n<div id='top'>\n	<h1>WebGL Beginner's Guide - Chapter 2</h1>\n	<h2>Rendering a Square</h2>\n	<div id='logo-packt'><img src='packt.gif'/></div>\n	<p>WebGL uses buffers to store and process vertex and index data. The mechanism is the same whether we are rendering \na simple object like a square or a racing car as we will see later on.</p>\n</div>\n\n<div id='contents'>\n	<div id='canvasContainer'>\n		<canvas id='canvas-element-id' width='480' height='400'>\n			Your browser does not support the HTML5 canvas element.\n		</canvas>\n	</div>\n</div>\n\n<div id='bottom'>\n</div>\n<script>cview.run();</script>\n</html>\n",
+			"file": "/C/Users/Q/Dropbox/webgl_examples/1727_02/ch2_Square.html",
+			"file_size": 5542,
+			"file_write_time": 130749720301479281,
+			"settings":
+			{
+				"buffer_size": 5552,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/C/Users/Q/Dropbox/webgl_examples/1727_02/js/utils.js",
+			"settings":
+			{
+				"buffer_size": 2450,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 127.0,
+		"last_filter": "instal",
+		"selected_items":
+		[
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"ssgl",
+				"Set Syntax: GLSL"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"rem",
+				"Package Control: Remove Channel"
+			],
+			[
+				"ssh",
+				"Set Syntax: HTML"
+			],
+			[
+				"mi",
+				"LaTeXTools: Reconfigure and migrate settings"
+			],
+			[
+				"mig",
+				"LaTeXTools: Reconfigure and migrate settings"
+			],
+			[
+				"latex",
+				"Set Syntax: LaTeX"
+			],
+			[
+				"pack",
+				"Package Control: Upgrade/Overwrite All Packages"
+			],
+			[
+				"up",
+				"Package Control: Upgrade/Overwrite All Packages"
+			],
+			[
+				"install",
+				"Haxelib: Install library"
+			],
+			[
+				"pick",
+				"Color Picker"
+			]
+		],
+		"width": 512.0
+	},
+	"console":
+	{
+		"height": 126.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = '2deb499853c4371624f5a07e27c334aa' + 'bf8c4e67d14fb0525ba4f89698a6d7e1'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by) "
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/C/Users/Q/Dropbox/html_games/axe"
+	],
+	"file_history":
+	[
+		"/C/Users/Q/Dropbox/html_games/axe/webgl_tools.js",
+		"/C/Users/Q/Dropbox/html_games/axe/main.js",
+		"/C/Users/Q/Dropbox/html_games/axe/axe_game.html",
+		"/C/Users/Q/Dropbox/html_games/axe/webgl-utils.js",
+		"/C/Users/Q/Dropbox/html_games/axe/frag_shad.glsl",
+		"/C/Users/Q/Dropbox/html_games/axe/test.js",
+		"/C/Users/Q/Downloads/latexmk-443a/latexmk/INSTALL",
+		"/C/Users/Q/Downloads/latexmk-443a/latexmk/README",
+		"/C/Users/Q/Dropbox/HaxeProjects/super_sponge/Source/Main.hx",
+		"/C/Users/Q/Dropbox/latex/careers/careers.tex",
+		"/C/Users/Q/Downloads/Character Sheet - Form Fillable-page-001.jpg",
+		"/C/Users/Q/Dropbox/latex/log2/log2.tex",
+		"/C/Users/Q/Dropbox/python/snoopy_q.py",
+		"/C/Users/Q/Dropbox/python/slimBot.py"
+	],
+	"find":
+	{
+		"height": 34.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"	\n",
+			"t_gl",
+			"shaderProgram",
+			"'",
+			"    ",
+			"token_stack",
+			"rainbow_msg",
+			"    \n"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "axe_game.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 819,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								416,
+								416
+							]
+						],
+						"settings":
+						{
+							"WordCountSyntax": "html",
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "main.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2015,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1775,
+								1775
+							]
+						],
+						"settings":
+						{
+							"WordCountShouldRun": false,
+							"WordCountSyntax": "javascript",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 270.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "webgl_tools.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 423,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								343,
+								343
+							]
+						],
+						"settings":
+						{
+							"WordCountSyntax": "javascript",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 3,
+					"file": "/C/Users/Q/Dropbox/webgl_examples/1727_02/ch2_Square.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5552,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2321,
+								2321
+							]
+						],
+						"settings":
+						{
+							"WordCountSyntax": "html",
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 315.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/C/Users/Q/Dropbox/webgl_examples/1727_02/js/utils.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2450,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1339,
+								1339
+							]
+						],
+						"settings":
+						{
+							"WordCountSyntax": "javascript",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 495.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				0,
+				1,
+				1,
+				2
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			0.5,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 100.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "html_axe.sublime-project",
+	"replace":
+	{
+		"height": 42.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
