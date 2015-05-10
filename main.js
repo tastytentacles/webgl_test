@@ -6,10 +6,9 @@ var indi_buff = null;
 var verts = [];
 var indis  = [];
 
-//var clear_color = {"R": 0.0, "G": 0.0, "B": 0.0, "A": 1.0};
-
 var c_width = 0;
 var c_hight = 0;
+
 
 function init() {
 	init_gl("c");
@@ -60,7 +59,7 @@ function init_prog() {
 
 	var fs_s = document.getElementById("shader-fs");
 	str = "";
-	var k = fs_s.firstChild;
+	k = fs_s.firstChild;
 	while (k) {
 		if (k.nodeType == 3) {
 			str += k.textContent;
@@ -83,45 +82,44 @@ function init_prog() {
 		{ alert("Shader failed"); }
 	gl.useProgram(prog);
 
-	prog.vecPos = gl.getAttribLocation(prog, "aVertexPosition");
+	prog.obj_pos = gl.getAttribLocation(prog, "obj_pos");
 }
 
 function init_buff() {
-	verts = [
-		-0.5, 0.5, 0.0,
-		-0.5, -0.5, 0.0,
-		0.5, -0.5, 0.0,
-		0.5, 0.5, 0.0
-	];
-
-	indis = [
-		3, 2, 1, 3, 1, 0
-	];
-
 	vert_buff = gl.createBuffer();
+	verts =  [
+		-0.1, 0.1, 0.0,
+		-0.1, -0.1, 0.0,
+		0.1, -0.1, 0.0,
+		0.1, 0.1, 0.0
+	];
 	gl.bindBuffer(gl.ARRAY_BUFFER, vert_buff);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
+
 	indi_buff = gl.createBuffer();
+	indis = [
+		3, 2, 1, 3, 1, 0
+	];
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indi_buff);
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indis), gl.STATIC_DRAW);
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 }
 
 function draw() {
-	// gl.clearColor(Math.random(), Math.random(), Math.random(), 1.0);
-	gl.clearColor(1.0, 0.0, 1.0, 1.0);
+	//gl.clearColor(Math.random(), Math.random(), Math.random(), 1.0);
+	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.enable(gl.DEPTH_TEST);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	gl.viewport(0, 0, c_width, c_height);
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, vert_buff);
-	gl.vertexAttribPointer(prog.aVertexPosition, 3, gl.FLOAT, false, 0, 0);
+	gl.vertexAttribPointer(prog.vecPos, 3, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray(prog.vecPos);
 
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indi_buff);
-	gl.drawElements(gl.LINES, indis.length, gl.UNSIGNED_SHORT, 0);
+	gl.drawElements(gl.TRIANGLE_STRIP, indis.length, gl.UNSIGNED_BYTE, 0);
 }
 
 function render_loop() {
