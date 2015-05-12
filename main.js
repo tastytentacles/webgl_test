@@ -6,8 +6,9 @@ var indi_buff = null;
 var verts = [];
 var indis  = [];
 
+var obj_count = 100;
 var colour_mat = [0.0, 0.0, 0.0];
-var box_pos = [0.0, 0.0, 0.0];
+var box_pos = [];
 
 var c_width = 0;
 var c_hight = 0;
@@ -17,6 +18,11 @@ function init() {
 	init_gl("c");
 	init_prog();
 	init_buff();
+
+	for (var n = 0; n < obj_count; n++) {
+		box_pos.push([(Math.random() * 2) - 1, (Math.random() * 2) - 1, 0.0]);
+	}
+
 	render_loop();
 	setInterval(logic_loop, 33);
 }
@@ -114,21 +120,22 @@ function init_buff() {
 }
 
 function draw() {
-	//gl.clearColor(Math.random(), Math.random(), Math.random(), 1.0);
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.enable(gl.DEPTH_TEST);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	gl.viewport(0, 0, c_width, c_height);
+	
+	for (var n = 0; n < obj_count; n++) {
+		gl.uniform3fv(prog.colour, colour_mat);
+		gl.uniform3fv(prog.pos, box_pos[n]);
 
-    gl.uniform3fv(prog.colour, colour_mat);
-    gl.uniform3fv(prog.pos, box_pos);
+		gl.bindBuffer(gl.ARRAY_BUFFER, vert_buff);
+		gl.vertexAttribPointer(prog.vecPos, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(prog.vecPos);
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, vert_buff);
-	gl.vertexAttribPointer(prog.vecPos, 3, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray(prog.vecPos);
-
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indi_buff);
-	gl.drawElements(gl.LINES, indis.length, gl.UNSIGNED_SHORT, 0);
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indi_buff);
+		gl.drawElements(gl.LINES, indis.length, gl.UNSIGNED_SHORT, 0);
+	}
 }
 
 function render_loop() {
@@ -138,11 +145,4 @@ function render_loop() {
 
 function logic_loop() {
 	colour_mat = [Math.random(), Math.random(), Math.random()];
-
-	box_pos[0] += 0.1;
-
-	if (box_pos[0] > 1.2) {
-		box_pos[0] = -1.2;
-		box_pos[1] = 1 - (Math.random() * 2);
-	}
 }
