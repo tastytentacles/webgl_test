@@ -6,6 +6,8 @@ var indi_buff = null;
 var verts = [];
 var indis  = [];
 
+var colour_mat = [0.0, 0.0, 0.0];
+
 var c_width = 0;
 var c_hight = 0;
 
@@ -83,6 +85,7 @@ function init_prog() {
 	gl.useProgram(prog);
 
 	prog.obj_pos = gl.getAttribLocation(prog, "obj_pos");
+	prog.colour = gl.getUniformLocation(prog, "colour");
 }
 
 function init_buff() {
@@ -100,7 +103,7 @@ function init_buff() {
 
 	indi_buff = gl.createBuffer();
 	indis = [
-		3, 2, 1, 3, 1, 0
+		0, 1, 0, 2, 0, 3, 2, 3, 2, 1
 	];
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indi_buff);
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indis), gl.STATIC_DRAW);
@@ -114,12 +117,14 @@ function draw() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	gl.viewport(0, 0, c_width, c_height);
 
+    gl.uniform3fv(prog.colour, colour_mat);
+
 	gl.bindBuffer(gl.ARRAY_BUFFER, vert_buff);
 	gl.vertexAttribPointer(prog.vecPos, 3, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray(prog.vecPos);
 
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indi_buff);
-	gl.drawElements(gl.TRIANGLE_STRIP, indis.length, gl.UNSIGNED_BYTE, 0);
+	gl.drawElements(gl.LINES, indis.length, gl.UNSIGNED_SHORT, 0);
 }
 
 function render_loop() {
@@ -128,5 +133,5 @@ function render_loop() {
 }
 
 function logic_loop() {
-	//console.log('cats');
+	colour_mat = [Math.random(), Math.random(), Math.random()];
 }

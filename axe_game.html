@@ -7,17 +7,22 @@
 			attribute vec3 vecPos;
 
 			void main(void) {
-				gl_Position = vec4(vecPos, 1.0); 
+				gl_Position = vec4(vecPos, 1.0);
+				// gl_PointSize = 200.0;
 			}
 		</script>
 
 		<script id="shader-fs" type="x-shader/x-fragment">
-		    #ifdef GL_ES
-		    precision highp float;
-		    #endif
-		    void main(void) {
-		        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-		    }
+			#ifdef GL_ES
+			precision highp float;
+			#endif
+
+			uniform vec3 colour;
+
+			void main(void) {
+				// gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+				gl_FragColor = vec4(colour, 1.0);
+			}
 		</script>
 
 		<script src="webgl_tools.js" type="text/javascript"></script>
