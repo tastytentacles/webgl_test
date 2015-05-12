@@ -6,8 +6,10 @@
 		<script id="shader-vs" type="x-shader/x-vertex">
 			attribute vec3 vecPos;
 
+			uniform vec3 pos;
+
 			void main(void) {
-				gl_Position = vec4(vecPos, 1.0);
+				gl_Position = vec4((pos + vecPos), 1.0);
 				// gl_PointSize = 200.0;
 			}
 		</script>

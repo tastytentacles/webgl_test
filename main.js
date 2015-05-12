@@ -7,6 +7,7 @@ var verts = [];
 var indis  = [];
 
 var colour_mat = [0.0, 0.0, 0.0];
+var box_pos = [0.0, 0.0, 0.0];
 
 var c_width = 0;
 var c_hight = 0;
@@ -85,7 +86,9 @@ function init_prog() {
 	gl.useProgram(prog);
 
 	prog.obj_pos = gl.getAttribLocation(prog, "obj_pos");
+
 	prog.colour = gl.getUniformLocation(prog, "colour");
+	prog.pos = gl.getUniformLocation(prog, "pos");
 }
 
 function init_buff() {
@@ -118,6 +121,7 @@ function draw() {
 	gl.viewport(0, 0, c_width, c_height);
 
     gl.uniform3fv(prog.colour, colour_mat);
+    gl.uniform3fv(prog.pos, box_pos);
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, vert_buff);
 	gl.vertexAttribPointer(prog.vecPos, 3, gl.FLOAT, false, 0, 0);
@@ -134,4 +138,11 @@ function render_loop() {
 
 function logic_loop() {
 	colour_mat = [Math.random(), Math.random(), Math.random()];
+
+	box_pos[0] += 0.1;
+
+	if (box_pos[0] > 1.2) {
+		box_pos[0] = -1.2;
+		box_pos[1] = 1 - (Math.random() * 2);
+	}
 }
