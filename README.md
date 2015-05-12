@@ -1,1 +1,1 @@
-this is a simple webGL project I am testing using to learn webGL, please disregard.
+this is a simple webGL project I am using to learn webGL, please disregard.
