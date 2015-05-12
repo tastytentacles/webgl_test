@@ -128,7 +128,7 @@ function draw() {
 
 	var dw = window.innerWidth;
 	var dh = window.innerHeight;
-	aspect = [1.0, gl.canvas.width / gl.canvas.height, 1.0, 1.0];
+	aspect = [gl.canvas.height / gl.canvas.width, 1.0, 1.0, 1.0];
 
 	if (gl.canvas.width != dw ||
 		gl.canvas.height != dh) {
