@@ -1,15 +1,13 @@
-var gl = null;
-var prog = null;
 var vert_buff = null;
 var indi_buff = null;
 
 var verts = [];
 var indis  = [];
 
-var aspect = [1.0, 1.0, 1.0, 1.0];
 var obj_count = 100;
 var colour_mat = [0.0, 0.0, 0.0];
 var box_pos = [];
+var box_stack = [];
 
 var c_width = 0;
 var c_hight = 0;
@@ -22,6 +20,10 @@ function init() {
 
 	for (var n = 0; n < obj_count; n++) {
 		box_pos.push([(Math.random() * 2) - 1, (Math.random() * 2) - 1, 0.0]);
+		t_box = {pos: [0.0, 0.0, 0.0], vec: [0.0, 0.0, 0.0]};
+		t_box.pos = [(Math.random() * 2) - 1, (Math.random() * 2) - 1, 0.0];
+		t_box.vec = [(Math.random() * 0.1) - 0.05, (Math.random() * 0.1) - 0.05, 0.0];
+		box_stack.push(t_box);
 	}
 
 	render_loop();
@@ -42,61 +44,6 @@ function init_gl(canvas_id) {
 
 	if (gl == null)
 		{ alert("dead webGL; RIP"); }
-}
-
-function init_prog() {
-	var vs = null;
-	var fs = null;
-	var str = "";
-	var shader = null;
-
-	var vs_s = document.getElementById("shader-vs");
-	str = "";
-	var k = vs_s.firstChild;
-	while (k) {
-		if (k.nodeType == 3) {
-			str += k.textContent;
-		}
-		k = k.nextSibling;
-	}
-	shader = gl.createShader(gl.VERTEX_SHADER);
-	gl.shaderSource(shader, str);
-	gl.compileShader(shader);
-	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-		{ alert(gl.getShaderInfoLog(shader)); }
-	vs = shader;
-	shader = null;
-
-	var fs_s = document.getElementById("shader-fs");
-	str = "";
-	k = fs_s.firstChild;
-	while (k) {
-		if (k.nodeType == 3) {
-			str += k.textContent;
-		}
-		k = k.nextSibling;
-	}
-	shader = gl.createShader(gl.FRAGMENT_SHADER);
-	gl.shaderSource(shader, str);
-	gl.compileShader(shader);
-	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-		{ alert(gl.getShaderInfoLog(shader)); }
-	fs = shader;
-	shader = null;
-
-	prog = gl.createProgram();
-	gl.attachShader(prog, vs);
-	gl.attachShader(prog, fs);
-	gl.linkProgram(prog);
-	if (!gl.getProgramParameter(prog, gl.LINK_STATUS))
-		{ alert("Shader failed"); }
-	gl.useProgram(prog);
-
-	prog.obj_pos = gl.getAttribLocation(prog, "obj_pos");
-
-	prog.asp = gl.getUniformLocation(prog, "asp");
-	prog.colour = gl.getUniformLocation(prog, "colour");
-	prog.pos = gl.getUniformLocation(prog, "pos");
 }
 
 function init_buff() {
@@ -143,7 +90,8 @@ function draw() {
 
 	for (var n = 0; n < obj_count; n++) {
 		gl.uniform3fv(prog.colour, colour_mat);
-		gl.uniform3fv(prog.pos, box_pos[n]);
+		// gl.uniform3fv(prog.pos, box_pos[n]);
+		gl.uniform3fv(prog.pos, box_stack[n].pos);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, vert_buff);
 		gl.vertexAttribPointer(prog.vecPos, 3, gl.FLOAT, false, 0, 0);
@@ -161,4 +109,8 @@ function render_loop() {
 
 function logic_loop() {
 	colour_mat = [Math.random(), Math.random(), Math.random()];
+	for (var n = 0; n < obj_count; n++) {
+		box_stack[n].vec = vec_3_add(box_stack[n].vec, [(0 - box_stack[n].pos[0]) / 1000, (0 - box_stack[n].pos[1]) / 1000, 0.0]);
+		box_stack[n].pos = vec_3_add(box_stack[n].pos, box_stack[n].vec);
+	}
 }
