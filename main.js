@@ -6,6 +6,7 @@ var indi_buff = null;
 var verts = [];
 var indis  = [];
 
+var aspect = [1.0, 1.0, 1.0, 1.0];
 var obj_count = 100;
 var colour_mat = [0.0, 0.0, 0.0];
 var box_pos = [];
@@ -93,6 +94,7 @@ function init_prog() {
 
 	prog.obj_pos = gl.getAttribLocation(prog, "obj_pos");
 
+	prog.asp = gl.getUniformLocation(prog, "asp");
 	prog.colour = gl.getUniformLocation(prog, "colour");
 	prog.pos = gl.getUniformLocation(prog, "pos");
 }
@@ -123,8 +125,22 @@ function draw() {
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.enable(gl.DEPTH_TEST);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	gl.viewport(0, 0, c_width, c_height);
-	
+
+	var dw = window.innerWidth;
+	var dh = window.innerHeight;
+	aspect = [1.0, gl.canvas.width / gl.canvas.height, 1.0, 1.0];
+
+	if (gl.canvas.width != dw ||
+		gl.canvas.height != dh) {
+
+		gl.canvas.width = dw;
+		gl.canvas.height = dh;
+
+		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+	}
+
+	gl.uniform4fv(prog.asp, aspect);
+
 	for (var n = 0; n < obj_count; n++) {
 		gl.uniform3fv(prog.colour, colour_mat);
 		gl.uniform3fv(prog.pos, box_pos[n]);
