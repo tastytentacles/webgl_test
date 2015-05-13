@@ -6,7 +6,6 @@ var indis  = [];
 
 var obj_count = 100;
 var colour_mat = [0.0, 0.0, 0.0];
-var box_pos = [];
 var box_stack = [];
 
 var c_width = 0;
@@ -19,10 +18,9 @@ function init() {
 	init_buff();
 
 	for (var n = 0; n < obj_count; n++) {
-		box_pos.push([(Math.random() * 2) - 1, (Math.random() * 2) - 1, 0.0]);
-		t_box = {pos: [0.0, 0.0, 0.0], vec: [0.0, 0.0, 0.0]};
+		t_box = {pos: [0.0, 0.0, 0.0], scl: [1.0], rot: [0.0], vec: [0.0, 0.0, 0.0]};
 		t_box.pos = [(Math.random() * 2) - 1, (Math.random() * 2) - 1, 0.0];
-		t_box.vec = [(Math.random() * 0.1) - 0.05, (Math.random() * 0.1) - 0.05, 0.0];
+		t_box.vec = [(Math.random() * 0.05) - 0.025, (Math.random() * 0.05) - 0.025, 0.0];
 		box_stack.push(t_box);
 	}
 
@@ -48,11 +46,25 @@ function init_gl(canvas_id) {
 
 function init_buff() {
 	vert_buff = gl.createBuffer();
+	// verts =  [
+	// 	-0.1, 0.1, 0.0,
+	// 	-0.1, -0.1, 0.0,
+	// 	0.1, -0.1, 0.0,
+	// 	0.1, 0.1, 0.0
+	// ];
 	verts =  [
-		-0.1, 0.1, 0.0,
-		-0.1, -0.1, 0.0,
-		0.1, -0.1, 0.0,
-		0.1, 0.1, 0.0
+		0.0, 0.7, 0.0,
+		0.4, 0.6, 0.0,
+		0.6, 0.2, 0.0,
+		0.5, -0.1, 0.0,
+		0.5, -0.4, 0.0,
+		0.0, -0.7, 0.0,
+		-0.3, -0.4, 0.0,
+		-0.6, -0.2, 0.0,
+		-0.4, -0.1, 0.0,
+		-0.5, 0.0, 0.0,
+		-0.5, 0.3, 0.0,
+		-0.2, 0.5, 0.0,
 	];
 	gl.bindBuffer(gl.ARRAY_BUFFER, vert_buff);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
@@ -60,8 +72,11 @@ function init_buff() {
 
 
 	indi_buff = gl.createBuffer();
+	// indis = [
+	// 	0, 1, 0, 2, 0, 3, 2, 3, 2, 1
+	// ];
 	indis = [
-		0, 1, 0, 2, 0, 3, 2, 3, 2, 1
+		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 	];
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indi_buff);
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indis), gl.STATIC_DRAW);
@@ -90,15 +105,15 @@ function draw() {
 
 	for (var n = 0; n < obj_count; n++) {
 		gl.uniform3fv(prog.colour, colour_mat);
-		// gl.uniform3fv(prog.pos, box_pos[n]);
 		gl.uniform3fv(prog.pos, box_stack[n].pos);
+		gl.uniform1f(prog.scl, box_stack[n].scl.value);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, vert_buff);
 		gl.vertexAttribPointer(prog.vecPos, 3, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(prog.vecPos);
 
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indi_buff);
-		gl.drawElements(gl.LINES, indis.length, gl.UNSIGNED_SHORT, 0);
+		gl.drawElements(gl.LINE_LOOP, indis.length, gl.UNSIGNED_SHORT, 0);
 	}
 }
 
@@ -109,6 +124,8 @@ function render_loop() {
 
 function logic_loop() {
 	colour_mat = [Math.random(), Math.random(), Math.random()];
+	// colour_mat = [1.0, 1.0, 1.0];
+
 	for (var n = 0; n < obj_count; n++) {
 		box_stack[n].vec = vec_3_add(box_stack[n].vec, [(0 - box_stack[n].pos[0]) / 1000, (0 - box_stack[n].pos[1]) / 1000, 0.0]);
 		box_stack[n].pos = vec_3_add(box_stack[n].pos, box_stack[n].vec);
