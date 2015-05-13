@@ -63,10 +63,14 @@ function init_prog() {
 	prog.colour = gl.getUniformLocation(prog, "colour");
 	prog.pos = gl.getUniformLocation(prog, "pos");
 	prog.scl = gl.getUniformLocation(prog, "scl");
+	prog.rot = gl.getUniformLocation(prog, "rot");
 }
 
 function vec_3_add(a, b)
-	{ c = [0.0, 0.0, 0.0]; c[0] = a[0] + b[0]; c[1] = a[1] + b[1]; c[2] = a[2] + b[2]; return c}
+	{ c = [0.0, 0.0, 0.0]; c[0] = a[0] + b[0]; c[1] = a[1] + b[1]; c[2] = a[2] + b[2]; return c; }
+
+function ang_to_vec_3(a)
+	{ c = [Math.cos(a) + -Math.sin(a), Math.sin(a) + Math.cos(a), 1]; return c; }
 
 
 

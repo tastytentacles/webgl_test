@@ -9,9 +9,10 @@
 			uniform vec4 asp;
 			uniform vec3 pos;
 			uniform vec3 scl;
+			uniform vec3 rot;
 
 			void main(void) {
-				vec3 vec_scaled = vecPos * scl;
+				vec3 vec_scaled = (vecPos * rot) * scl;
 
 				gl_Position = asp * vec4((pos + (vec_scaled * 0.1)), 1.0);
 			}
