@@ -18,9 +18,11 @@ function init() {
 	init_buff();
 
 	for (var n = 0; n < obj_count; n++) {
-		t_box = {pos: [0.0, 0.0, 0.0], scl: [1.0], rot: [0.0], vec: [0.0, 0.0, 0.0]};
+		t_box = {pos: [0.0, 0.0, 0.0], scl: [0.1, 0.1, 0.1], rot: [0.0], vec: [0.0, 0.0, 0.0]};
 		t_box.pos = [(Math.random() * 2) - 1, (Math.random() * 2) - 1, 0.0];
 		t_box.vec = [(Math.random() * 0.05) - 0.025, (Math.random() * 0.05) - 0.025, 0.0];
+		var r = Math.random() + 0.2;
+		t_box.scl = [r, r, 1.0];
 		box_stack.push(t_box);
 	}
 
@@ -106,7 +108,7 @@ function draw() {
 	for (var n = 0; n < obj_count; n++) {
 		gl.uniform3fv(prog.colour, colour_mat);
 		gl.uniform3fv(prog.pos, box_stack[n].pos);
-		gl.uniform1f(prog.scl, box_stack[n].scl.value);
+		gl.uniform3fv(prog.scl, box_stack[n].scl);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, vert_buff);
 		gl.vertexAttribPointer(prog.vecPos, 3, gl.FLOAT, false, 0, 0);

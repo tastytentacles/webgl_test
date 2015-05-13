@@ -62,7 +62,7 @@ function init_prog() {
 	prog.asp = gl.getUniformLocation(prog, "asp");
 	prog.colour = gl.getUniformLocation(prog, "colour");
 	prog.pos = gl.getUniformLocation(prog, "pos");
-	prog.pos = gl.getUniformLocation(prog, "scl");
+	prog.scl = gl.getUniformLocation(prog, "scl");
 }
 
 function vec_3_add(a, b)

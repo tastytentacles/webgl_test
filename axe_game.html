@@ -8,12 +8,12 @@
 
 			uniform vec4 asp;
 			uniform vec3 pos;
-			uniform float scl;
+			uniform vec3 scl;
 
 			void main(void) {
-				vecPos * scl;
+				vec3 vec_scaled = vecPos * scl;
 
-				gl_Position = asp * vec4((pos + (vecPos * 0.1)), 1.0);
+				gl_Position = asp * vec4((pos + (vec_scaled * 0.1)), 1.0);
 			}
 		</script>
 
