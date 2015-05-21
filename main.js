@@ -8,6 +8,8 @@ var obj_count = 10;
 var colour_mat = [0.0, 0.0, 0.0];
 var box_stack = [];
 
+var hit_stack = [];
+
 var c_width = 0;
 var c_hight = 0;
 
@@ -18,12 +20,12 @@ function init() {
 	init_buff();
 
 	for (var n = 0; n < obj_count; n++) {
-		t_box = {pos: [0.0, 0.0, 0.0], scl: [0.1, 0.1, 0.1], rot: [1.0, 1.0, 1.0], vec: [0.0, 0.0, 0.0]};
+		t_box = {pos: [0.0, 0.0, 0.0], scl: [0.1, 0.1, 0.1], rot: 0.0, vec: [0.0, 0.0, 0.0]};
 		t_box.pos = [(Math.random() * 2) - 1, (Math.random() * 2) - 1, 0.0];
 		t_box.vec = [(Math.random() * 0.05) - 0.025, (Math.random() * 0.05) - 0.025, 0.0];
-		var r = Math.random() + 0.2;
-		t_box.scl = [r, r, 1.0];
-		t_box.rot = ang_to_vec_3(Math.random() * 360);
+		var rs = Math.random() + 0.2;
+		t_box.scl = [rs, rs, rs];
+		t_box.rot = (Math.random() * 360.0);
 		box_stack.push(t_box);
 	}
 
@@ -49,12 +51,6 @@ function init_gl(canvas_id) {
 
 function init_buff() {
 	vert_buff = gl.createBuffer();
-	// verts =  [
-	// 	-0.1, 0.1, 0.0,
-	// 	-0.1, -0.1, 0.0,
-	// 	0.1, -0.1, 0.0,
-	// 	0.1, 0.1, 0.0
-	// ];
 	verts =  [
 		0.0, 0.7, 0.0,
 		0.4, 0.6, 0.0,
@@ -75,9 +71,6 @@ function init_buff() {
 
 
 	indi_buff = gl.createBuffer();
-	// indis = [
-	// 	0, 1, 0, 2, 0, 3, 2, 3, 2, 1
-	// ];
 	indis = [
 		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 	];
@@ -110,7 +103,7 @@ function draw() {
 		gl.uniform3fv(prog.colour, colour_mat);
 		gl.uniform3fv(prog.pos, box_stack[n].pos);
 		gl.uniform3fv(prog.scl, box_stack[n].scl);
-		gl.uniform3fv(prog.rot, box_stack[n].rot);
+		gl.uniform1f(prog.rot, box_stack[n].rot);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, vert_buff);
 		gl.vertexAttribPointer(prog.vecPos, 3, gl.FLOAT, false, 0, 0);
@@ -127,12 +120,13 @@ function render_loop() {
 }
 
 function logic_loop() {
-	// colour_mat = [Math.random(), Math.random(), Math.random()];
 	colour_mat = [1.0, 1.0, 1.0];
 
 	for (var n = 0; n < obj_count; n++) {
-		box_stack[n].vec = vec_3_add(box_stack[n].vec, [(0 - box_stack[n].pos[0]) / 1000, (0 - box_stack[n].pos[1]) / 1000, 0.0]);
+		box_stack[n].vec = vec_3_add(
+			box_stack[n].vec,
+			[(0 - box_stack[n].pos[0]) / 1500, (0 - box_stack[n].pos[1]) / 1500, 0.0]);
 		box_stack[n].pos = vec_3_add(box_stack[n].pos, box_stack[n].vec);
-		box_stack[n].rot = ang_to_vec_3(Math.random() * 360);
+		box_stack[n].rot += 0.1;
 	}
 }

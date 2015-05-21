@@ -69,8 +69,11 @@ function init_prog() {
 function vec_3_add(a, b)
 	{ c = [0.0, 0.0, 0.0]; c[0] = a[0] + b[0]; c[1] = a[1] + b[1]; c[2] = a[2] + b[2]; return c; }
 
-function ang_to_vec_3(a)
-	{ c = [Math.cos(a) + -Math.sin(a), Math.sin(a) + Math.cos(a), 1]; return c; }
+function vec_inv(a)
+	{ b = [-a[0], -a[1], -a[2]]; return b; }
+
+function dist_to_point(a, b)
+	{ c = Math.sqrt(Math.pow(b[0] - a[0], 2) + Math.pow(b[1] - a[1], 2)); return c; }
 
 
 
